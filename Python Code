@@ -1,0 +1,120 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import numpy as np
+from scipy import signal
+import statistics
+import codecs
+import serial
+import time
+import os
+import librosa
+from PIL import Image
+from PyEMD import EMD
+from scipy.signal import hilbert
+import matplotlib.pyplot as plt
+from keras.applications.vgg16 import VGG16,
+preprocess input
+from keras.layers import Flatten
+from keras.layers import Dense
+from keras.layers import Dropout
+from keras.models import Model
+from keras.preprocessing.image import ImageDataGenerator
+from tensorflow.keras.models import load model
+************PYSERIAL CODE***********
+
+ser = serial.Serial(’COM5’,9600,timeout = 1)
+time.sleep(2)
+co=[]
+for i in range(2000):
+line = ser.readline()
+s=codecs.decode(line)
+content=s.strip(”  ̊ ”)
+print(content)
+co.append(float(content))
+ser.close()
+num=[]
+for item in co
+num.append(float(item))
+signal1=num[1000:2000]
+signal1=np.array(signal1)
+
+***************LUNG SOUND REMOVAL (WAVELET TRANSFORM)***********
+
+fs, data = wav.read(”104 1b1 Al sc Litt3200.wav”)
+data=data[::6]
+if len(data.shape) > 1:
+data = data[:, 0]
+wavelet = ’db4’
+level = 4
+coeffs = pywt.wavedec(data, wavelet, level=level)
+reconstructed signal = pywt.waverec(coeffs, wavelet)
+plt.figure()
+plt.plot(data, label=’Original signal’)
+plt.plot(reconstructed signal, label=’Reconstructed signal’)
+plt.legend()
+plt.show()
+reconstructed signal2=reconstructed signal[0:1000]
+sample entropy = sampen(reconstructed signal2)
+print(”Sample entropy:”, sample entropy)
+
+***************LUNG SOUND REMOVAL (EMD)***********
+
+emd = EMD()
+imfs = emd(signal1)
+envelopes = []
+for i in range(len(imfs)):
+analytic signal = hilbert(imfs[i])
+amplitude envelope = np.abs(analytic signal)
+envelopes.append(amplitude envelope)
+heart envelope = envelopes[2]
+lung signal = signal1 - heart envelope
+
+**************PLOTTING SPECTROGRAM***********
+
+fig, ax = plt.subplots()
+plt.specgram(lung signal,Fs=1764,cmap=’inferno’)
+plt.xlabel(’Time (s)’)
+plt.ylabel(’Frequency (Hz)’)
+plt.colorbar()
+plt.gca().set axis off()
+plt.subplots adjust(top = 1, bottom = 0, right = 1, left = 0,
+hspace = 0, wspace = 0)
+plt.margins(0,0)
+ax.xaxis.set major locator(plt.NullLocator())
+ax.yaxis.set major locator(plt.NullLocator())
+plt.savefig(’temp.png’, bbox inches=’tight’, pad inches=0)
+image = Image.open(’temp.png’)
+image resized = image.resize((224, 224))
+************SAVING THE IMAGE****************
+
+output dir = ”F:/MAIN PROJECT/spectrograms/REALTIME”
+print(”Enter your name =”)
+filename=input()
+output filename = os.path.join(output dir,
+os.path.splitext(filename)[0] + ”.png”)
+image resized.save(output filename)
+plt.close()
+os.remove(’temp.png’)
+
+****************VGG 16 MODEL*****************
+* Define image and model parameters
+model = load model(’lung sound classification model.h5’)
+img size = (224, 224)
+batch size = 32
+num classes = 4
+labels = [’crackles’, ’wheezes’, ’healthy’, ’both crackles and wheezes’]
+
+* Predict the class of a single image
+image path =output filename
+img = Image.open(image path).resize(img size)
+img = img.convert(’RGB’)
+x = np.array(img).astype(np.float32)
+x = np.expand dims(x, axis=0)
+x = preprocess input(x)
+
+preds = model.predict(x)[0]
+class idx = np.argmax(preds)
+class name = labels[class idx]
+accuracy = preds[class idx]
+
+print(f’The patient has ”class name” with accuracy
